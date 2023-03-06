@@ -1,0 +1,28 @@
+=== Bizpress Calculators ===
+Contributors: Bizink,Jayden Major
+Tags: Bizink, Bizpress, marketing, Calculators, Calculator
+Requires at least: 5.6
+Tested up to: 6.1.1
+Stable tag: 1.0
+Version: 1.0
+Requires PHP: 7.2
+
+Display Calculators on your website that is automatically updated by the Bizink team.
+
+== Description ==
+Display Calculators on your website that is automatically updated by the Bizink team.
+
+=== BizPress Plugins ===
+- Bizpress Accounting Glossary
+- Bizpress Business Terms Glossary
+- Bizpress Key Dates
+- Bizpress Xero Resources
+- Bizpress Business Resources
+- Bizpress Luca
+- Bizpress Payroll
+- BizPress Calculators
+
+== Changelog ==
+
+= 1.0 =
+* Bizpress Calculators
