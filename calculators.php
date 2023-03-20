@@ -6,47 +6,73 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-function calculator_settings_fields( $fields, $section ) {
-
-	//if ( 'bizink-client_basic' != $section['id'] ) return $fields;
-	
-	if('bizink-client_basic' == $section['id']){
-		$fields['calculator_content_page'] = array(
-			'id'      => 'calculator_content_page',
-			'label'     => __( 'Bizink Client calculator', 'bizink-client' ),
-			'type'      => 'select',
-			'desc'      => __( 'Select the page to show the content. This page must contain the <code>[bizink-content]</code> shortcode.', 'bizink-client' ),
-			'options'	=> cxbc_get_posts( [ 'post_type' => 'page' ] ),
-			// 'chosen'	=> true,
-			'required'	=> false,
-		);
-	}
-	
-	if('bizink-client_content' == $section['id']){
-		$fields['calculator_label'] = array(
-			'id' => 'calculator',
-	        'label'	=> __( 'Bizink Client Calculator', 'bizink-client' ),
-	        'type' => 'divider'
-		);
-		$fields['calculator_title'] = array(
-			'id' => 'calculator_title',
-			'label'     => __( 'Calculator Page Title', 'bizink-client' ),
-			'type'      => 'text',
-			'default'   => __( 'Calculators', 'bizink-client' ),
-			'required'	=> true,
-		);
-		$fields['calculator_desc'] = array(
-			'id'      	=> 'calculator_desc',
-			'label'     => __( 'Calculator page Description', 'bizink-client' ),
-			'type'      => 'textarea',
-			'default'   => __( 'Free Calculators to help you in your business.', 'bizink-client' ),
-			'required'	=> true,
-		);
-	}
-
-	return $fields;
+function bizpress_calculator_init() {
+	wp_register_script('bizpress-calculator-block',plugins_url( 'calculator-block.js', __FILE__ ));
 }
-add_filter( 'cx-settings-fields', 'calculator_settings_fields', 10, 2 );
+add_action( 'init', 'bizpress_calculator_init' );
+
+function bizpress_calculator_shortcode( $atts ) {
+    // Parse the shortcode attributes
+    $atts = shortcode_atts( array(
+        'id' => '',
+    ), $atts );
+	
+    // Get the calculator content based on the ID parameter
+	$data = bizpress_caculator_get_single( intval( $atts['id'] ) )[0];
+	//print_r($data);
+	if ( is_wp_error( $data ) ) {
+		$calculator_content = 'Error: Could not retrieve calculator content.';
+	}
+	else{
+		$calculator_content = $data->content->rendered;
+	}
+
+    // Return the calculator content wrapped in a div with a unique ID
+    return '<div id="bizpress-calculator-' . esc_attr( $atts['id'] ) . '">' . $calculator_content . '</div>';
+}
+add_shortcode( 'bizpress-calculator', 'bizpress_calculator_shortcode' );
+
+
+function bizpress_caculator_settings($section){			
+	$calculators = bizpress_caculator_get_all();
+	$calculatorsBizpress = array();
+	if(is_wp_error($calculators)){
+		$calculatorsBizpress[0] = [
+			'id' => 'calculator_error',
+			'label' => __('Error', 'bizink-client'),
+			'message' => __('Could not retrieve calculator content.','bizink-clinet'),
+		];
+	}
+	else if(empty($calculators)){
+		$calculatorsBizpress[0] = [
+			'id' => 'calculator_nodata',
+			'label' => __('No Caculators', 'bizink-client'),
+			'message' => __('There are not calculators to show at the moment','bizink-clinet'),
+			'type' => 'admin_message'
+		];
+	}
+	else{
+		foreach($calculators as $calc){
+			//print_r($calc);
+			array_push($calculatorsBizpress,array(
+				'id' => 'calculator_'.$calc->id,
+				'label' => __($calc->title->rendered, 'bizink-client'),
+				'type' => 'admin_shortcode',
+				'shortcode' => '[bizpress-calculator id="'.$calc->id.'"]',
+				'copy' => true
+			));
+		}
+	}
+	$section['calculator_settings'] = [
+		'id'        => 'bizink_calculators',
+		'label'     => __( 'Calculators', 'bizink-client' ),
+		'icon'      => 'dashicons-calculator',
+		'color'		=> '#4c3f93',
+		'fields' => $calculatorsBizpress
+	];
+	return $section;
+}
+add_filter('cx-settings-sections','bizpress_caculator_settings');
 
 function calculator_content( $types ) {
 	$types[] = [
@@ -69,17 +95,108 @@ add_action( 'init', 'bizink_calculator_init');
 function bizink_calculator_init(){
 	$post = bizink_get_calculator_page_object();
 	if( is_object( $post ) && get_post_type( $post ) == "page" ){
-		add_rewrite_tag('%'.$post->post_name.'%', '([^&]+)', 'bizpress=');
-		add_rewrite_rule('^'.$post->post_name . '/([^/]+)/?$','index.php?pagename=' . $post->post_name . '&bizpress=$matches[1]','top');
-		add_rewrite_rule("^".$post->post_name."/([a-z0-9-]+)[/]?$",'index.php?pagename='.$post->post_name.'&bizpress=$matches[1]','top');
-		add_rewrite_rule("^".$post->post_name."/topic/([a-z0-9-]+)[/]?$",'index.php?pagename='.$post->post_name.'&topic=$matches[1]','top');
-		add_rewrite_rule("^".$post->post_name."/type/([a-z0-9-]+)[/]?$" ,'index.php?pagename='.$post->post_name.'&type=$matches[1]','top');
+		add_rewrite_tag('%'.$post->post_name.'%', '([^&]+)', 'calculator=');
+		add_rewrite_rule('^'.$post->post_name . '/([^/]+)/?$','index.php?pagename=' . $post->post_name . '&calculator=$matches[1]','top');
+		add_rewrite_rule("^".$post->post_name."/([a-z0-9-]+)[/]?$",'index.php?pagename='.$post->post_name.'&calculator=$matches[1]','top');
 		//flush_rewrite_rules();
 	}
 }
 
 add_filter('query_vars', 'bizpress_calculator_qurey');
 function bizpress_calculator_qurey($vars) {
-    $vars[] = "bizpress";
+    $vars[] = "calculator";
     return $vars;
+}
+
+function bizpress_caculator_get_single($id){
+	$data = get_transient("bizpress_caculator_".$id);
+	if(empty($data) == false){
+		return $data;
+	}
+
+	if(function_exists('bizink_get_master_site_url')){
+        $base_url = bizink_get_master_site_url();
+    }
+    else{
+        $base_url = 'https://bizinkcontent.com/';
+    }
+    if(function_exists('bizink_url_authontication')){
+        $args = bizink_url_authontication();
+    }
+    else{
+        $args = array(
+            'timeout' => 120,
+		    'httpversion' => '1.1',
+            'headers' => array(
+                'Content-Type' => 'application/json',
+            )
+        );
+    }
+    $options = get_option( 'bizink-client_basic' );
+    if(empty($options['user_email'])){
+		$options['user_email'] = '';
+	}
+	if(empty($options['user_password'])){
+		$options['user_password'] = '';
+	}
+	$url = add_query_arg( [ 
+        'email'         => $options['user_email'],
+        'password'      => ncrypt()->encrypt( $options['user_password'] ),
+		'p'				=> $id,
+        'luca'		    => function_exists('luca') ? true : false
+    ], wp_slash( $base_url.'wp-json/wp/v2/calculators' ) );
+    $response = wp_remote_get( $url, $args );
+    if ( is_wp_error( $response ) ) {
+        return $response;
+    } 
+    else {
+		set_transient( "bizpress_caculator_".$id, $response, DAY_IN_SECONDS );
+        return json_decode( wp_remote_retrieve_body( $response ) );
+    }
+}
+
+function bizpress_caculator_get_all(){
+	$data = get_transient("bizpress_caculator");
+	if(empty($data) == false){
+		return $data;
+	}
+
+	if(function_exists('bizink_get_master_site_url')){
+        $base_url = bizink_get_master_site_url();
+    }
+    else{
+        $base_url = 'https://bizinkcontent.com/';
+    }
+    if(function_exists('bizink_url_authontication')){
+        $args = bizink_url_authontication();
+    }
+    else{
+        $args = array(
+            'timeout' => 120,
+		    'httpversion' => '1.1',
+            'headers' => array(
+                'Content-Type' => 'application/json',
+            )
+        );
+    }
+    $options = get_option( 'bizink-client_basic' );
+    if(empty($options['user_email'])){
+		$options['user_email'] = '';
+	}
+	if(empty($options['user_password'])){
+		$options['user_password'] = '';
+	}
+	$url = add_query_arg( [ 
+        'email'         => $options['user_email'],
+        'password'      => ncrypt()->encrypt( $options['user_password'] ),
+        'luca'		    => function_exists('luca') ? true : false
+    ], wp_slash( $base_url.'wp-json/wp/v2/calculators' ) );
+    $response = wp_remote_get( $url, $args );
+    if ( is_wp_error( $response ) ) {
+        return $response;
+    } 
+    else {
+		set_transient( "bizpress_caculator", $response, DAY_IN_SECONDS );
+        return json_decode( wp_remote_retrieve_body( $response ) );
+    }
 }

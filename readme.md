@@ -3,19 +3,26 @@
 BizPress is Bizink's collection of WordPress plugins.
 
 ## BizPress Pliguns
-- BizPress Main - This repo
-- BizPress - Accounting Glossary [https://github.com/BizInk/bizpress-accounting-glossary](https://github.com/BizInk/bizpress-accounting-glossary)
-- BizPress - Business Terms Glossary [https://github.com/BizInk/bizpress-business-terms-glossary](https://github.com/BizInk/bizpress-business-terms-glossary)
-- BizPress - Key Dates [https://github.com/BizInk/bizpress-key-dates](https://github.com/BizInk/bizpress-key-dates)
-- BizPress - Xero Resources [https://github.com/BizInk/bizpress-xero-resources](https://github.com/BizInk/bizpress-xero-resources)
-- BizPress - Quickbooks Resources [https://github.com/BizInk/bizpress-quickbooks-resources](https://github.com/BizInk/bizpress-quickbooks-resources)
-- BizPress - Business Resources [https://github.com/BizInk/bizpress-business-resources](https://github.com/BizInk/bizpress-business-resources)
-- BizPress - Luca [https://github.com/BizInk/bizpress-luca](https://github.com/BizInk/bizpress-luca)
-- Bizpress - WC [https://github.com/BizInk/bizink-wc](https://github.com/BizInk/bizink-wc) - Validates User logins this is on the Bizink site
+### Client Plugins
+- [BizPress](https://github.com/BizInk/bizpress-client)
+- [BizPress - Accounting Glossary](https://github.com/BizInk/bizpress-accounting-glossary)
+- [BizPress - Business Terms Glossary](https://github.com/BizInk/bizpress-business-terms-glossary)
+- [BizPress - Key Dates](https://github.com/BizInk/bizpress-key-dates)
+- [BizPress - Xero Resources](https://github.com/BizInk/bizpress-xero-resources)
+- [BizPress - Quickbooks Resources](https://github.com/BizInk/bizpress-quickbooks-resources)
+- [BizPress - Business Resources](https://github.com/BizInk/bizpress-business-resources)
+- [Bizpress - Payroll](https://github.com/BizInk/bizpress-payroll)
+- [Bizpress - Caculators](https://github.com/BizInk/bizpress-caculators)
 
+### Client Site Plugins
+- [BizPress - Luca](https://github.com/BizInk/bizpress-luca) - Luca 1 sites only
+
+### Server Plugins
+- [Bizpress - WC](https://github.com/BizInk/bizink-wc) - Validates User logins this is on the Bizink site
+- [Bizpress - Publisher](https://github.com/BizInk/bizink-publisher) - The content publisher on bizinkcontent.com
 ## How to update the plugin
 1. Have the latest version of the plugin in the master/main branch
-    - Note this should contain the latest version number in the plugin file ```bizink-clinet.php```
+    - Note this should contain the latest version number in the plugin file ```e.g. bizink-clinet.php```
 2. Make sure the **Readme.txt** file is up to date - This file is written in **WordPress Markdown** see Readme.txt section below
     - This has a Version item and a Stable Tag item **both** should be the new verson number e.g. 1.0
     - This file also has a Change Log included. Update this as this file is used by wordpress to show changes on the plugin update section

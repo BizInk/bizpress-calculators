@@ -19,16 +19,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if(!defined('CXBPC')){
-	define( 'CXBPC', __FILE__ );
-}
-
 // Plugin Updater
 require 'plugin-update-checker/plugin-update-checker.php';
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 $myUpdateChecker = PucFactory::buildUpdateChecker('https://github.com/BizInk/bizpress-calculators',__FILE__,'bizpress-calculators');
 // Set the branch that contains the stable release.
-$myUpdateChecker->setBranch('master');
+$myUpdateChecker->setBranch('main');
 // Using a private repository, specify the access token 
 $myUpdateChecker->setAuthentication('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');
 
