@@ -96,8 +96,8 @@ function bizink_calculator_init(){
 	$post = bizink_get_calculator_page_object();
 	if( is_object( $post ) && get_post_type( $post ) == "page" ){
 		add_rewrite_tag('%'.$post->post_name.'%', '([^&]+)', 'calculator=');
-		add_rewrite_rule('^'.$post->post_name . '/([^/]+)/?$','index.php?pagename=' . $post->post_name . '&calculator=$matches[1]','top');
-		add_rewrite_rule("^".$post->post_name."/([a-z0-9-]+)[/]?$",'index.php?pagename='.$post->post_name.'&calculator=$matches[1]','top');
+		add_rewrite_rule('^'.$post->post_name . '/([^/]+)/?$','index.php?pagename=calculators&calculator=$matches[1]','top');
+		add_rewrite_rule("^".$post->post_name."/([a-z0-9-]+)[/]?$",'index.php?pagename=calculators&calculator=$matches[1]','top');
 		//flush_rewrite_rules();
 	}
 }
