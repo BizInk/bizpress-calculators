@@ -158,7 +158,7 @@ function bizpress_caculator_get_single($id){
 function bizpress_caculator_get_all(){
 	$data = get_transient("bizpress_caculator");
 	if(empty($data) == false){
-		return $data;
+		//return $data;
 	}
 
 	if(function_exists('bizink_get_master_site_url')){
