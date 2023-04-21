@@ -3,8 +3,8 @@ Contributors: Bizink,Jayden Major
 Tags: Bizink, Bizpress, marketing, Calculators, Calculator
 Requires at least: 5.6
 Tested up to: 6.2
-Stable tag: 1.2
-Version: 1.2
+Stable tag: 1.2.1
+Version: 1.2.1
 Requires PHP: 7.2
 
 Display Calculators on your website that is automatically updated by the Bizink team.
@@ -23,6 +23,9 @@ Display Calculators on your website that is automatically updated by the Bizink 
 - BizPress Calculators
 
 == Changelog ==
+
+= 1.2.1 =
+* Bug Fix: Fixing a bug where the caculators wouldn't load if they had a transient stored for their requested item 
 
 = 1.2 =
 * Hot Fix: Bug when fetching a list of all caculators

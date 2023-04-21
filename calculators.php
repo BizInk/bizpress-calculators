@@ -110,8 +110,8 @@ function bizpress_calculator_qurey($vars) {
 
 function bizpress_caculator_get_single($id){
 	$data = get_transient("bizpress_caculator_".$id);
-	if(empty($data) == false){
-		return $data;
+	if($data){
+		//return $data;
 	}
 
 	if(function_exists('bizink_get_master_site_url')){
@@ -157,7 +157,7 @@ function bizpress_caculator_get_single($id){
 
 function bizpress_caculator_get_all(){
 	$data = get_transient("bizpress_caculator");
-	if(empty($data) == false){
+	if($data){
 		//return $data;
 	}
 
