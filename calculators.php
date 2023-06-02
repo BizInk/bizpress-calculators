@@ -15,16 +15,25 @@ function bizpress_calculator_shortcode( $atts ) {
     // Parse the shortcode attributes
     $atts = shortcode_atts( array(
         'id' => '',
+		'slug' => ''
     ), $atts );
 	
     // Get the calculator content based on the ID parameter
-	$data = bizpress_caculator_get_single( intval( $atts['id'] ) )[0];
-	//print_r($data);
+	$data = bizpress_calculator_get_single( intval( $atts['id'] ) )[0];
 	if ( is_wp_error( $data ) ) {
 		$calculator_content = 'Error: Could not retrieve calculator content.';
 	}
 	else{
-		$calculator_content = $data->content->rendered;
+		$calculator_content = $data->content->rendered . '<div style="display:none;" class="bizpress-data" id="bizpress-data"
+		data-single="true"
+		data-siteid="'.(function_exists('bizpress_anylitics_get_site_id') ? bizpress_anylitics_get_site_id() : "false").'"
+		data-title="'.$data->title->rendered.'"
+		data-url="'.get_permalink().'"
+		data-slug="'.$data->slug.'"
+		data-id="'.$atts['id'].'"
+		data-posttype="calculator"
+		data-topics="false"
+		data-types="false"></div>';
 	}
 
     // Return the calculator content wrapped in a div with a unique ID
@@ -108,8 +117,8 @@ function bizpress_calculator_qurey($vars) {
     return $vars;
 }
 
-function bizpress_caculator_get_single($id){
-	$data = get_transient("bizpress_caculator_".$id);
+function bizpress_calculator_get_single($id){
+	$data = get_transient("bizpress_calculator_".$id);
 	if($data){
 		//return $data;
 	}
@@ -129,6 +138,8 @@ function bizpress_caculator_get_single($id){
 		    'httpversion' => '1.1',
             'headers' => array(
                 'Content-Type' => 'application/json',
+				'Accept' => 'application/json',
+				'Authorization' => 'Bearer OSEgUIcnTnaLAPTjkbVtwrwZzMqkpywTIYzZMnpB'
             )
         );
     }
@@ -143,6 +154,7 @@ function bizpress_caculator_get_single($id){
         'email'         => $options['user_email'],
         'password'      => ncrypt()->encrypt( $options['user_password'] ),
 		'p'				=> $id,
+		'include'		=> array($id),
         'luca'		    => function_exists('luca') ? true : false
     ], wp_slash( $base_url.'wp-json/wp/v2/calculators' ) );
     $response = wp_remote_get( $url, $args );
@@ -150,13 +162,13 @@ function bizpress_caculator_get_single($id){
         return $response;
     } 
     else {
-		set_transient( "bizpress_caculator_".$id, $response, DAY_IN_SECONDS );
+		set_transient( "bizpress_calculator_".$id, $response, (DAY_IN_SECONDS * 2) );
         return json_decode( wp_remote_retrieve_body( $response ) );
     }
 }
 
 function bizpress_caculator_get_all(){
-	$data = get_transient("bizpress_caculator");
+	$data = get_transient("bizpress_calculators");
 	if($data){
 		//return $data;
 	}
@@ -176,6 +188,8 @@ function bizpress_caculator_get_all(){
 		    'httpversion' => '1.1',
             'headers' => array(
                 'Content-Type' => 'application/json',
+				'Accept' => 'application/json',
+				'Authorization' => 'Bearer OSEgUIcnTnaLAPTjkbVtwrwZzMqkpywTIYzZMnpB'
             )
         );
     }
@@ -196,7 +210,7 @@ function bizpress_caculator_get_all(){
         return $response;
     } 
     else {
-		set_transient( "bizpress_caculator", $response, DAY_IN_SECONDS );
+		set_transient( "bizpress_calculators", $response, (DAY_IN_SECONDS * 2) );
         return json_decode( wp_remote_retrieve_body( $response ) );
     }
 }

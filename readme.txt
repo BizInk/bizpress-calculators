@@ -24,6 +24,10 @@ Display Calculators on your website that is automatically updated by the Bizink 
 
 == Changelog ==
 
+= 1.2.2 =
+* Add Anylitics
+* Fix duplicate caculators issue
+
 = 1.2.1 =
 * Bug Fix: Fixing a bug where the caculators wouldn't load if they had a transient stored for their requested item 
 
