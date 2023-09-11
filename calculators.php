@@ -2,6 +2,9 @@
 /**
  * if accessed directly, exit.
  */
+
+use function PHPSTORM_META\map;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -42,74 +45,53 @@ function bizpress_calculator_shortcode( $atts ) {
 add_shortcode( 'bizpress-calculator', 'bizpress_calculator_shortcode' );
 
 
-function bizpress_caculator_settings($section){			
+function bizpress_caculator_settings($sections){
 	$calculators = bizpress_caculator_get_all();
-	$calculatorsBizpress = array();
+	$calculatorsBizpress = [];
 	if(is_wp_error($calculators)){
-		$calculatorsBizpress[0] = [
-			'id' => 'calculator_error',
-			'label' => __('Error', 'bizink-client'),
-			'message' => __('Could not retrieve calculator content.','bizink-clinet'),
+		$calculatorsBizpress = [
+			"calculator_error" => [
+				"id" => "calculator_error",
+				"type" => "admin_message",
+				"label" => __('Error', 'bizink-client'),
+				"message" => __('Could not retrieve calculator content.','bizink-clinet'),
+			]
 		];
 	}
-	else if(empty($calculators)){
-		$calculatorsBizpress[0] = [
-			'id' => 'calculator_nodata',
-			'label' => __('No Caculators', 'bizink-client'),
-			'message' => __('There are not calculators to show at the moment','bizink-clinet'),
-			'type' => 'admin_message'
-		];
-	}
-	else{
+	else if(!empty($calculators)){
 		foreach($calculators as $calc){
-			//print_r($calc);
-			array_push($calculatorsBizpress,array(
-				'id' => 'calculator_'.$calc->id,
-				'label' => __($calc->title->rendered, 'bizink-client'),
-				'type' => 'admin_shortcode',
-				'shortcode' => '[bizpress-calculator id="'.$calc->id.'"]',
-				'copy' => true
-			));
+			$calculatorsBizpress[ $calc->slug ] = [
+				"id" => $calc->slug,
+				"label" => $calc->title->rendered,
+				"type" => "admin_shortcode",
+				"shortcode" => "[bizpress-calculator id=\"".$calc->id."\"]",
+				"copy" => true
+			];
 		}
 	}
-	$section['calculator_settings'] = [
-		'id'        => 'bizink_calculators',
+	else{
+		$calculatorsBizpress = [
+			"calculator_nodata" => [
+				"id" => "calculator_nodata",
+				"label" => __('No Caculators', 'bizink-client'),
+				"message" => __('There are no calculators to show at the moment','bizink-clinet'),
+				"type" => "admin_message"
+			]
+		];
+	}
+	$sections["calculators"] = array(
+		'id'        => 'calculators',
 		'label'     => __( 'Calculators', 'bizink-client' ),
 		'icon'      => 'dashicons-calculator',
 		'color'		=> '#4c3f93',
+		'sticky'	=> false,
+		'submit_button' => false,
+		'reset_button' => false,
 		'fields' => $calculatorsBizpress
-	];
-	return $section;
+	);
+	return $sections;
 }
 add_filter('cx-settings-sections','bizpress_caculator_settings');
-
-function calculator_content( $types ) {
-	$types[] = [
-		'key' 	=> 'calculator_content_page',
-		'type'	=> 'calculator-content'
-	];
-	return $types;
-}
-add_filter( 'bizink-content-types', 'calculator_content' );
-
-if( !function_exists( 'bizink_get_calculator_page_object' ) ){
-	function bizink_get_calculator_page_object(){
-		$post_id = cxbc_get_option( 'bizink-client_basic', 'calculator_content_page' );
-		$post = get_post( $post_id );
-		return $post;
-	}
-}
-
-add_action( 'init', 'bizink_calculator_init');
-function bizink_calculator_init(){
-	$post = bizink_get_calculator_page_object();
-	if( is_object( $post ) && get_post_type( $post ) == "page" ){
-		add_rewrite_tag('%'.$post->post_name.'%', '([^&]+)', 'calculator=');
-		add_rewrite_rule('^'.$post->post_name . '/([^/]+)/?$','index.php?pagename=calculators&calculator=$matches[1]','top');
-		add_rewrite_rule("^".$post->post_name."/([a-z0-9-]+)[/]?$",'index.php?pagename=calculators&calculator=$matches[1]','top');
-		//flush_rewrite_rules();
-	}
-}
 
 add_filter('query_vars', 'bizpress_calculator_qurey');
 function bizpress_calculator_qurey($vars) {
@@ -119,8 +101,8 @@ function bizpress_calculator_qurey($vars) {
 
 function bizpress_calculator_get_single($id){
 	$data = get_transient("bizpress_calculator_".$id);
-	if($data){
-		//return $data;
+	if(!empty($data)){
+		return json_decode($data);
 	}
 
 	if(function_exists('bizink_get_master_site_url')){
@@ -134,12 +116,11 @@ function bizpress_calculator_get_single($id){
     }
     else{
         $args = array(
-            'timeout' => 120,
+            'timeout' => 10,
 		    'httpversion' => '1.1',
             'headers' => array(
                 'Content-Type' => 'application/json',
 				'Accept' => 'application/json',
-				'Authorization' => 'Bearer OSEgUIcnTnaLAPTjkbVtwrwZzMqkpywTIYzZMnpB'
             )
         );
     }
@@ -162,17 +143,16 @@ function bizpress_calculator_get_single($id){
         return $response;
     } 
     else {
-		set_transient( "bizpress_calculator_".$id, $response, (DAY_IN_SECONDS * 2) );
+		set_transient( "bizpress_calculator_".$id, wp_remote_retrieve_body( $response ), DAY_IN_SECONDS );
         return json_decode( wp_remote_retrieve_body( $response ) );
     }
 }
 
 function bizpress_caculator_get_all(){
 	$data = get_transient("bizpress_calculators");
-	if($data){
-		//return $data;
+	if(!empty($data)){
+		//return json_decode($data);
 	}
-
 	if(function_exists('bizink_get_master_site_url')){
         $base_url = bizink_get_master_site_url();
     }
@@ -184,12 +164,11 @@ function bizpress_caculator_get_all(){
     }
     else{
         $args = array(
-            'timeout' => 120,
+            'timeout' => 10,
 		    'httpversion' => '1.1',
             'headers' => array(
                 'Content-Type' => 'application/json',
 				'Accept' => 'application/json',
-				'Authorization' => 'Bearer OSEgUIcnTnaLAPTjkbVtwrwZzMqkpywTIYzZMnpB'
             )
         );
     }
@@ -210,7 +189,7 @@ function bizpress_caculator_get_all(){
         return $response;
     } 
     else {
-		set_transient( "bizpress_calculators", $response, (DAY_IN_SECONDS * 2) );
+		set_transient( "bizpress_calculators", wp_remote_retrieve_body( $response ), DAY_IN_SECONDS );
         return json_decode( wp_remote_retrieve_body( $response ) );
     }
 }

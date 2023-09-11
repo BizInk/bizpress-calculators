@@ -2,10 +2,9 @@
 Contributors: Bizink,Jayden Major
 Tags: Bizink, Bizpress, marketing, Calculators, Calculator
 Requires at least: 5.6
-Tested up to: 6.2
-Stable tag: 1.2.1
-Version: 1.2.1
-Requires PHP: 7.2
+Tested up to: 6.3.1
+Stable tag: 1.2.3
+Requires PHP: 7.4
 
 Display Calculators on your website that is automatically updated by the Bizink team.
 
@@ -23,6 +22,9 @@ Display Calculators on your website that is automatically updated by the Bizink 
 - BizPress Calculators
 
 == Changelog ==
+
+= 1.2.3 =
+* Calculators Admin Settings
 
 = 1.2.2 =
 * Add Anylitics
