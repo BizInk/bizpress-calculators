@@ -27,7 +27,21 @@ function bizpress_calculator_shortcode( $atts ) {
 		$calculator_content = 'Error: Could not retrieve calculator content.';
 	}
 	else{
-		$calculator_content = $data->content->rendered . '<div style="display:none;" class="bizpress-data" id="bizpress-data"
+		$iframe_script = '<script>
+		window.addEventListener("message", function (event) {
+			if (event.data == "masterHeight") {
+				var body 	= document.body, html = document.documentElement;
+				var height = Math.max(body.scrollHeight, body.offsetHeight,html.clientHeight, html.scrollHeight, html.offsetHeight);
+				event.source.postMessage({ "masterHeight": height }, "*");       
+			}
+		});
+		window.onload = function(){
+			var body = document.body, html = document.documentElement;
+			var height = Math.max(body.scrollHeight, body.offsetHeight,html.clientHeight, html.scrollHeight, html.offsetHeight);
+			parent.postMessage({ "masterHeight": height }, "*");
+		}
+		</script>";';
+		$calculator_content = '<iframe class="bizpress-iframe bizpress-iframe-calculator" width="800" height="800" id="bizpress-iframe-'. esc_attr($atts['id']) .'" srcdoc=\''. $data->content->rendered . $iframe_script .'\'></iframe><div style="display:none;" class="bizpress-data" id="bizpress-data"
 		data-single="true"
 		data-siteid="'.(function_exists('bizpress_anylitics_get_site_id') ? bizpress_anylitics_get_site_id() : "false").'"
 		data-title="'.$data->title->rendered.'"
@@ -36,11 +50,17 @@ function bizpress_calculator_shortcode( $atts ) {
 		data-id="'.$atts['id'].'"
 		data-posttype="calculator"
 		data-topics="false"
-		data-types="false"></div>';
+		data-types="false"></div><script>(function() {
+            var bizpress_iframe_'. esc_attr($atts['id']) .'_doc = document.getElementById("bizpress-iframe-'.esc_attr($atts['id']).'");
+            window.addEventListener("message", function (e) {
+                if (e.data.hasOwnProperty("masterHeight") && e.source === bizpress_iframe_'. esc_attr($atts['id']) .'_doc.contentWindow) { bizpress_iframe_'. esc_attr($atts['id']) .'_doc.style.height = e.data.masterHeight + "px"; }
+            });
+            bizpress_iframe_'. esc_attr($atts['id']) .'_doc.contentWindow.postMessage("masterHeight", "*");
+        })();</script>';
 	}
 
     // Return the calculator content wrapped in a div with a unique ID
-    return '<div id="bizpress-calculator-' . esc_attr( $atts['id'] ) . '">' . $calculator_content . '</div>';
+    return '<div class="bizpress-calculator" id="bizpress-calculator-' . esc_attr( $atts['id'] ) . '">' . $calculator_content . '</div>';
 }
 add_shortcode( 'bizpress-calculator', 'bizpress_calculator_shortcode' );
 
