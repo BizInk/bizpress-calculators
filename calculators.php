@@ -28,17 +28,21 @@ function bizpress_calculator_shortcode( $atts ) {
 	}
 	else{
 		$iframe_script = '<script>
-		window.addEventListener("message", function (event) {
-			if (event.data == "masterHeight") {
-				var body 	= document.body, html = document.documentElement;
-				var height = Math.max(body.scrollHeight, body.offsetHeight,html.clientHeight, html.scrollHeight, html.offsetHeight);
-				event.source.postMessage({ "masterHeight": height }, "*");       
-			}
-		});
-		window.onload = function(){
+		function sendHeight() {
 			var body = document.body, html = document.documentElement;
 			var height = Math.max(body.scrollHeight, body.offsetHeight,html.clientHeight, html.scrollHeight, html.offsetHeight);
-			parent.postMessage({ "masterHeight": height }, "*");
+			window.parent.postMessage({ "masterHeight": height }, "*");
+		}
+		window.addEventListener("message", function (event) {
+			if (event.data == "masterHeight") {
+				sendHeight();
+			}
+		});
+		window.addEventListener("click", function (event) {
+			sendHeight();
+		});
+		window.onload = function(){
+			sendHeight();
 		}
 		</script>";';
 		$calculator_content = '<iframe class="bizpress-iframe bizpress-iframe-calculator" width="800" height="800" id="bizpress-iframe-'. esc_attr($atts['id']) .'" srcdoc=\''. $data->content->rendered . $iframe_script .'\'></iframe><div style="display:none;" class="bizpress-data" id="bizpress-data"

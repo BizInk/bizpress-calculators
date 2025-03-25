@@ -19,7 +19,7 @@ Display Calculators on your website that is automatically updated by the Bizink 
 - Bizpress Business Resources
 - Bizpress Luca
 - Bizpress Payroll
-- BizPress Calculators
+- Bizpress Calculators
 
 == Changelog ==
 
