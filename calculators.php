@@ -203,11 +203,43 @@ function bizpress_caculator_get_all(){
 	if(empty($options['user_password'])){
 		$options['user_password'] = '';
 	}
+	if(empty($options['content_region'])){
+		$options['content_region'] = 'au';
+	}
+
 	$url = add_query_arg( [ 
         'email'         => $options['user_email'],
         'password'      => ncrypt()->encrypt( $options['user_password'] ),
         'luca'		    => function_exists('luca') ? true : false
     ], wp_slash( $base_url.'wp-json/wp/v2/calculators' ) );
+
+	$myRegionID = 0;
+	$regionIDs = [];
+	if(function_exists('bizpress_get_regons')){
+		$regionIDs = get_transient('bizpress_blog_regions');
+		if(empty($regionIDs)){
+			$regionIDs = bizpress_get_regons();
+		}
+		foreach($regionIDs as $region){
+			if(strtolower($region->slug) == strtolower($options['content_region'])){
+				$myRegionID = $region->id;
+			}
+		}
+	}
+	else if(function_exists('bizpress_blogs_get_regons')){
+		$regionIDs = get_transient('bizpress_blog_regions');
+		if(empty($regionIDs)){
+			$regionIDs = bizpress_blogs_get_regons();
+		}
+		foreach($regionIDs as $region){
+			if(strtolower($region->slug) == strtolower($options['content_region'])){
+				$myRegionID = $region->id;
+			}
+		}
+	}
+	if(!empty($myRegionID) && $myRegionID != 0) $args = array_merge(array('region' => $myRegionID),$args);
+	if(!empty($myRegionID) && $myRegionID != 0) $args = array_merge(array('categories' => $myRegionID),$args);
+
     $response = wp_remote_get( $url, $args );
     if ( is_wp_error( $response ) ) {
         return $response;
@@ -216,4 +248,28 @@ function bizpress_caculator_get_all(){
 		set_transient( "bizpress_calculators", wp_remote_retrieve_body( $response ), DAY_IN_SECONDS );
         return json_decode( wp_remote_retrieve_body( $response ) );
     }
+}
+
+if(!function_exists('bizpress_get_regons') && !function_exists('bizpress_blogs_get_regons')){
+	function bizpress_get_regons(){
+		global $bizink_bace,$bizinkcontent_client;
+		if(get_transient('bizpress_blog_regions')){
+			return get_transient('bizpress_blog_regions');
+		}
+		$regionUrl = add_query_arg(array( '_fields' => 'id,name,slug','count' ),wp_slash($bizink_bace.'region'));
+		$response = wp_remote_get($regionUrl,$bizinkcontent_client);
+		$status = wp_remote_retrieve_response_code($response);
+		if($status < 400){
+			$body = json_decode(wp_remote_retrieve_body( $response ));
+			set_transient('bizpress_blog_regions', $body, DAY_IN_SECONDS * 5);
+			return $body;
+		}
+		else{
+			return array(
+				'status' => 'error',
+				'type' => 'fetch_error_regions',
+				'message' => 'There was an error fetching the regions.'
+			);
+		}
+	}
 }
