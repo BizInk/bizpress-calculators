@@ -45,7 +45,7 @@ function bizpress_calculator_shortcode( $atts ) {
 			sendHeight();
 		}
 		</script>";';
-		$calculator_content = '<iframe class="bizpress-iframe bizpress-iframe-calculator" width="800" height="800" id="bizpress-iframe-'. esc_attr($atts['id']) .'" srcdoc=\''. $data->content->rendered . $iframe_script .'\'></iframe><div style="display:none;" class="bizpress-data" id="bizpress-data"
+		$calculator_content = $data->content->rendered . $iframe_script .'<script type="text/javascript" src="https://bizink-calculators.s3.us-west-1.amazonaws.com/js/iframeResizer.min.js"></script><script>iFrameResize({})</script><div style="display:none;" class="bizpress-data" id="bizpress-data"
 		data-single="true"
 		data-siteid="'.(function_exists('bizpress_anylitics_get_site_id') ? bizpress_anylitics_get_site_id() : "false").'"
 		data-title="'.$data->title->rendered.'"
