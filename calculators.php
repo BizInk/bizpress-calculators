@@ -220,11 +220,14 @@ function bizpress_caculator_get_all(){
 		if(empty($regionIDs)){
 			$regionIDs = bizpress_get_regons();
 		}
-		foreach($regionIDs as $region){
-			if(strtolower($region->slug) == strtolower($options['content_region'])){
-				$myRegionID = $region->id;
+		else{
+			foreach($regionIDs as $region){
+				if(strtolower($region->slug) == strtolower($options['content_region'])){
+					$myRegionID = $region->id;
+				}
 			}
 		}
+		
 	}
 	else if(function_exists('bizpress_blogs_get_regons')){
 		$regionIDs = get_transient('bizpress_blog_regions');
